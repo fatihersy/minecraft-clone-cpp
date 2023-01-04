@@ -27,7 +27,8 @@ int main()
         (
             camera_metrices.view_matrix,
             camera_metrices.projection_matrix,
-            camera_metrices.get_camera_position
+            camera_metrices.get_camera_position,
+            camera_metrices.camera_front
         );
 
         platform_end_frame();

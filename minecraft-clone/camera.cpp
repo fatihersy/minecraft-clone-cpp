@@ -5,11 +5,11 @@
 glm::mat4 view(1.f);
 glm::mat4 projection(1.f);
 
-glm::vec3 camera_pos = glm::vec3(128.0f, 10.0f, 128.0f);
+glm::vec3 camera_pos = glm::vec3(0.f);
 glm::vec3 camera_front = glm::vec3(1.0f, 0.0f, 1.0f);
 glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
-glm::vec3 camera_right = glm::vec3(128.0f, 10.0f, 128.0f);
-glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::vec3 camera_right;
+glm::vec3 world_up;
 
 float player_width = 1.f;
 float player_height = 1.8f;
@@ -31,7 +31,7 @@ void initialize_camera(float _width, float _height, float _yaw, float _pitch)
 	WINDOW_WIDTH = _width;
 	WINDOW_HEIGHT = _height;
 
-	camera_pos = glm::vec3(0.f, 7.f, 3.f);
+	camera_pos = glm::vec3(0.f, 18.f, 0.f);
 	world_up = glm::vec3(0.f, 1.f, 0.f);
 	yaw = _yaw;
 	pitch = _pitch;
@@ -45,7 +45,8 @@ camera_metrice_packet camera_update_packet()
 	{
 		glm::lookAt(camera_pos, camera_pos + camera_front, camera_up),
 		glm::perspective(glm::radians(fov), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f),
-		camera_pos
+		camera_pos,
+		camera_front
 	};
 }
 

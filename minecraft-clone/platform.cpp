@@ -48,7 +48,6 @@ void platform_begin_frame()
 {
     current_frame = static_cast<float>(glfwGetTime());
     delta_time = current_frame - last_frame;
-    std::cout << "FPS: " << 1.0f / delta_time << std::endl;
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
