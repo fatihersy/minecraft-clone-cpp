@@ -1,88 +1,136 @@
 #include "block.h"
 
 #include "shader.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
-float cubeVertices[] = {
-    // positions          // normals
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+float vertices_quad[] = {
+	// positions        // texture coords
+	 0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
+	 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
+	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
+	-0.5f,  0.5f, 0.0f, 0.0f, 1.0f  // top left 
+};
+unsigned int indices_quad[] = {  // note that we start from 0!
+	0, 1, 3,  // first Triangle
+	1, 2, 3   // second Triangle
 };
 
 
 shader_program program;
-unsigned int cubeVAO, cubeVBO;
-unsigned int block_texture;
+unsigned int block_vao, block_vbo, block_ebo;
+unsigned int texture_top;
+unsigned int texture_left;
+unsigned int texture_bottom;
+static glm::mat4 model(1.f);
 
-void initialize_block_resources(unsigned int texture)
+void initialize_block_resources(unsigned int top, unsigned int left, unsigned int bottom)
 {
 	program = create_program("D:/Workspace/Resources/cubemaps.vs", "D:/Workspace/Resources/cubemaps.fs");
 
-	// cube VAO
-	glGenVertexArrays(1, &cubeVAO);
-	glGenBuffers(1, &cubeVBO);
-	glBindVertexArray(cubeVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glGenVertexArrays(1, &block_vao);
+	glGenBuffers(1, &block_vbo);
+	glGenBuffers(1, &block_ebo);
 
-    block_texture = texture;
+	glBindVertexArray(block_vao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, block_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_quad), &vertices_quad, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block_ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_quad), &indices_quad, GL_STATIC_DRAW);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    // texture coord attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+    texture_top = top;
+	texture_left = left;
+	texture_bottom = bottom;
 
 	program.use();
-	program.setInt("skybox", 0);
+	program.setInt("texture1", 0);
+	program.setInt("texture2", 1);
+	program.setInt("texture3", 2);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture_top);
 }
 
-void update_block_shader(glm::mat4 model, glm::mat4 view, glm::mat4 projection, glm::vec3 position)
+void update_block_shader(glm::mat4 view, glm::mat4 projection, glm::vec3 position)
 {
-	program.update_program(model, view, projection, position);
+	program.update_program(view, projection, position);
 }
 
-void draw_block()
+void draw_block(glm::vec3 position, neigbors neigbors)
 {
-	glBindVertexArray(cubeVAO);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, block_texture);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);
+	program.setInt("texture_index", 1);
+	glBindVertexArray(block_vao);
+
+    if (!neigbors.up)
+    {
+        model = glm::mat4(1.f);
+        model = glm::translate(model, glm::vec3(position.x, position.y + 0.5, position.z ));
+        model = glm::rotate(model, glm::radians(90.f), glm::vec3(90.0f, 0.0f, 0.0f));
+        program.setMat4("model", model);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    }
+
+
+    if (!neigbors.down)
+    {
+        model = glm::mat4(1.f);
+        model = glm::translate(model, glm::vec3(position.x, position.y - 0.5, position.z ));
+        model = glm::rotate(model, glm::radians(90.f), glm::vec3(90.0f, 0.0f, 0.0f));
+        program.setMat4("model", model);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    }
+
+
+    if (!neigbors.right)
+    {
+        model = glm::mat4(1.f);
+        model = glm::translate(model, glm::vec3(position.x + 0.5, position.y, position.z ));
+        model = glm::rotate(model, glm::radians(90.f), glm::vec3(0.0f, 90.f, 0.f));
+        program.setMat4("model", model);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    }
+
+
+    if (!neigbors.left)
+    {
+        model = glm::mat4(1.f);
+        model = glm::translate(model, glm::vec3(position.x - 0.5, position.y, position.z ));
+        model = glm::rotate(model, glm::radians(90.f), glm::vec3(0.0f, 90.f, 0.f));
+        program.setMat4("model", model);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    }
+
+
+    if (!neigbors.front)
+    {
+        model = glm::mat4(1.f);
+        model = glm::translate(model, glm::vec3(position.x, position.y, position.z + 0.5 ));
+        model = glm::rotate(model, glm::radians(0.f), glm::vec3(0.0f, 0.0f, 90.0f));
+        program.setMat4("model", model);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    }
+
+
+    if (!neigbors.back)
+    {
+        model = glm::mat4(1.f);
+        model = glm::translate(model, glm::vec3(position.x, position.y, position.z - 0.5 ));
+        model = glm::rotate(model, glm::radians(0.f), glm::vec3(0.0f, 0.0f, 90.0f));
+        program.setMat4("model", model);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    }
+
+    glBindVertexArray(0);
 }

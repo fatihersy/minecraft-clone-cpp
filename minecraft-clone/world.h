@@ -14,7 +14,7 @@ static std::vector<std::string> skybox_faces =
     "D:/Workspace/skybox/back.jpg",
 };
 
-void initialize_world(unsigned int skybox_texture);
+void initialize_world(unsigned int block_texture, unsigned int skybox_texture);
 
 void update_world(glm::mat4 view, glm::mat4 projection, glm::vec3 position);
 

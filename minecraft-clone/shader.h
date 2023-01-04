@@ -81,12 +81,10 @@ typedef struct shader_program
         glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 
-
-    void update_program(glm::mat4 model, glm::mat4 view, glm::mat4 projection, glm::vec3 position)
+    void update_program(glm::mat4 view, glm::mat4 projection, glm::vec3 position)
     {
         // draw scene as normal
         glUseProgram(ID);
-        setMat4("model", model);
         setMat4("view", view);
         setMat4("projection", projection);
         setVec3("cameraPos", position);

@@ -48,6 +48,7 @@ void platform_begin_frame()
 {
     current_frame = static_cast<float>(glfwGetTime());
     delta_time = current_frame - last_frame;
+    std::cout << "FPS: " << 1.0f / delta_time << std::endl;
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -176,7 +177,7 @@ void scroll_callback(void* window, double xoffset, double yoffset)
 
 // utility function for loading a 2D texture from file
 // ---------------------------------------------------
-unsigned int loadTexture(std::string path)
+unsigned int loadTexture(std::string path, bool is_png)
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
@@ -185,16 +186,8 @@ unsigned int loadTexture(std::string path)
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
     if (data)
     {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
-
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, is_png ? GL_RGBA : GL_RGB, width, height, 0, is_png ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

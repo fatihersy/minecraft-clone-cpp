@@ -68,19 +68,23 @@ void initialize_skybox_resources(unsigned int texture)
 
 	skybox_program.use();
 	skybox_program.setInt("skybox", 0);
+    skybox_program.setMat4("model", glm::mat4(0.f));
 }
 
 void draw_skybox(glm::mat4 model, glm::mat4 view, glm::mat4 projection, glm::vec3 position) 
 {
+    skybox_program.use();
+
     // draw skybox as last
     glDepthFunc(GL_LEQUAL);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    skybox_program.update_program(
-        model,
+    skybox_program.update_program
+    (
         glm::mat4(glm::mat3(view)),
         projection,
-        position);
+        position
+    );
 
     // skybox cube
     glBindVertexArray(skyboxVAO);

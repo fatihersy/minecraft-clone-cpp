@@ -13,7 +13,9 @@ int main()
     initialize_camera(window_width, window_height);
 
     unsigned int skybox_texture = loadCubemap(skybox_faces);
-    initialize_world(skybox_texture);
+    unsigned int block_texture = loadTexture("D:/Workspace/grass_top.jpg", false);
+
+    initialize_world(block_texture, skybox_texture);
 
     while (platform_pump_messages())
     {
