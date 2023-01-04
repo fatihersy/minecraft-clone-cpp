@@ -1,12 +1,6 @@
 #include "camera.h"
 
-//#include "graphic.h"
-//#include "collision.h"
-//#include "shader.h"
-
 #include <vector>
-#include "glm/glm.hpp"
-#include <glm/gtc/matrix_transform.hpp>
 
 glm::mat4 view(1.f);
 glm::mat4 projection(1.f);
@@ -27,7 +21,7 @@ float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 re
 float pitch = 0.0f;
 float fov = 60.0f;
 
-float camera_speed = 10.f; // adjust accordingly
+float camera_speed = 2.5f; // adjust accordingly
 
 float WINDOW_WIDTH;
 float WINDOW_HEIGHT;
@@ -37,12 +31,22 @@ void initialize_camera(float _width, float _height, float _yaw, float _pitch)
 	WINDOW_WIDTH = _width;
 	WINDOW_HEIGHT = _height;
 
-	camera_pos = glm::vec3(0.f, 0.f, 3.f);
+	camera_pos = glm::vec3(0.f, 7.f, 3.f);
 	world_up = glm::vec3(0.f, 1.f, 0.f);
 	yaw = _yaw;
 	pitch = _pitch;
 
 	update_camera_vectors();
+}
+
+camera_metrice_packet camera_update_packet() 
+{
+	return camera_metrice_packet
+	{
+		glm::lookAt(camera_pos, camera_pos + camera_front, camera_up),
+		glm::perspective(glm::radians(fov), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f),
+		camera_pos
+	};
 }
 
 void rotate_camera(float xoffset, float yoffset)
@@ -72,7 +76,6 @@ void move_camera(camera_movement move_direction, float delta_time)
 		camera_pos += camera_right * velocity;
 }
 
-
 void update_camera_vectors() 
 {
 	// calculate the new Front vector
@@ -84,20 +87,4 @@ void update_camera_vectors()
 	// also re-calculate the Right and Up vector
 	camera_right = glm::normalize(glm::cross(camera_front, world_up));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
 	camera_up = glm::normalize(glm::cross(camera_right, camera_front));
-}
-
-
-
-
-glm::mat4 get_view_matrix() 
-{
-	return glm::lookAt(camera_pos, camera_pos + camera_front, camera_up);
-}
-glm::vec3 get_camera_position() 
-{
-	return camera_pos;
-}
-glm::mat4 get_projection_matrix() 
-{
-	return glm::perspective(glm::radians(fov), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f);
 }

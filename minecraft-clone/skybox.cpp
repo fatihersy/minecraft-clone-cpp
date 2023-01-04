@@ -47,17 +47,6 @@ float skyboxVertices[] = {
      1.0f, -1.0f,  1.0f
 };
 
-std::vector<std::string> skybox_faces
-{
-    "D:/Workspace/skybox/right.jpg",
-    "D:/Workspace/skybox/left.jpg",
-    "D:/Workspace/skybox/top.jpg",
-    "D:/Workspace/skybox/bottom.jpg",
-    "D:/Workspace/skybox/front.jpg",
-    "D:/Workspace/skybox/back.jpg",
-};
-
-
 shader_program skybox_program;
 unsigned int skyboxVAO, skyboxVBO;
 unsigned int skybox_texture;
@@ -85,6 +74,7 @@ void draw_skybox(glm::mat4 model, glm::mat4 view, glm::mat4 projection, glm::vec
 {
     // draw skybox as last
     glDepthFunc(GL_LEQUAL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     skybox_program.update_program(
         model,
@@ -100,9 +90,4 @@ void draw_skybox(glm::mat4 model, glm::mat4 view, glm::mat4 projection, glm::vec
     glBindVertexArray(0);
 
     glDepthFunc(GL_LESS); // set depth function back to default
-}
-
-std::vector<std::string> get_skybox_face_paths() 
-{
-    return skybox_faces;
 }
