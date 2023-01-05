@@ -144,6 +144,7 @@
     <ClInclude Include="block.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="fdefines.h" />
+    <ClInclude Include="PerlinNoise.hpp" />
     <ClInclude Include="platform.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="skybox.h" />

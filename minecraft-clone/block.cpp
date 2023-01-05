@@ -20,12 +20,10 @@ unsigned int indices_quad[] = {  // note that we start from 0!
 
 shader_program program;
 unsigned int block_vao, block_vbo, block_ebo;
-unsigned int texture_top;
-unsigned int texture_left;
-unsigned int texture_bottom;
+std::vector<unsigned int> block_textures;
 static glm::mat4 model(1.f);
 
-void initialize_block_resources(unsigned int top, unsigned int left, unsigned int bottom)
+void initialize_block_resources(std::vector<unsigned int> _block_textures)
 {
 	program = create_program("D:/Workspace/Resources/cubemaps.vs", "D:/Workspace/Resources/cubemaps.fs");
 
@@ -50,17 +48,18 @@ void initialize_block_resources(unsigned int top, unsigned int left, unsigned in
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-    texture_top = top;
-	texture_left = left;
-	texture_bottom = bottom;
+    block_textures = _block_textures;
 
 	program.use();
-	program.setInt("texture1", 0);
-	program.setInt("texture2", 1);
-	program.setInt("texture3", 2);
+	program.setInt("texture1", 1);
+	program.setInt("texture2", 2);
+	program.setInt("texture3", 3);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, texture_top);
+    for (size_t i = 1; i <= block_textures.size(); i++)
+    {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, i);
+    }
 }
 
 void update_block_shader(glm::mat4 view, glm::mat4 projection, glm::vec3 position)
@@ -70,7 +69,7 @@ void update_block_shader(glm::mat4 view, glm::mat4 projection, glm::vec3 positio
 
 void draw_block(glm::vec3 position, neigbors neigbors)
 {
-	program.setInt("texture_index", 1);
+	program.setInt("texture_index", 3);
 	glBindVertexArray(block_vao);
 
     if (!neigbors.up)

@@ -12,10 +12,14 @@ int main()
 
     initialize_camera(window_width, window_height);
 
-    unsigned int skybox_texture = loadCubemap(skybox_faces);
-    unsigned int block_texture = loadTexture("D:/Workspace/grass_top.jpg", false);
+    std::vector<unsigned int> block_textures;
 
-    initialize_world(block_texture, skybox_texture);
+    block_textures.push_back(loadTexture("D:/Workspace/grass_top.jpg", false));
+    block_textures.push_back(loadTexture("D:/Workspace/grass_side.jpg", false));
+    block_textures.push_back(loadTexture("D:/Workspace/grass_bottom.jpg", false));
+
+    unsigned int skybox_texture = loadCubemap(skybox_faces);
+    initialize_world(block_textures, skybox_texture);
 
     while (platform_pump_messages())
     {

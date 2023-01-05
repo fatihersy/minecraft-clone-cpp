@@ -21,7 +21,7 @@ float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 re
 float pitch = 0.0f;
 float fov = 60.0f;
 
-float camera_speed = 2.5f; // adjust accordingly
+float camera_speed = 10.f; // adjust accordingly
 
 float WINDOW_WIDTH;
 float WINDOW_HEIGHT;
