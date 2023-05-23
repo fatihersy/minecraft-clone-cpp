@@ -25,7 +25,7 @@ static glm::mat4 model(1.f);
 
 void initialize_block_resources(std::vector<unsigned int> _block_textures)
 {
-	program = create_program("D:/Workspace/Resources/cubemaps.vs", "D:/Workspace/Resources/cubemaps.fs");
+	program = create_program("D:/Workspace/CLang/Resources/cubemaps.vs", "D:/Workspace/CLang/Resources/cubemaps.fs");
 
 	glGenVertexArrays(1, &block_vao);
 	glGenBuffers(1, &block_vbo);
@@ -70,7 +70,6 @@ void update_block_shader(glm::mat4 view, glm::mat4 projection, glm::vec3 positio
 void draw_block(glm::vec3 position, neigbors neigbors)
 {
 	program.setInt("texture_index", 3);
-	glBindVertexArray(block_vao);
 
     if (!neigbors.up)
     {
@@ -115,7 +114,7 @@ void draw_block(glm::vec3 position, neigbors neigbors)
     if (!neigbors.front)
     {
         model = glm::mat4(1.f);
-        model = glm::translate(model, glm::vec3(position.x, position.y, position.z + 0.5 ));
+        model = glm::translate(model, glm::vec3(position.x, position.y, position.z - 0.5 ));
         model = glm::rotate(model, glm::radians(0.f), glm::vec3(0.0f, 0.0f, 90.0f));
         program.setMat4("model", model);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -125,11 +124,19 @@ void draw_block(glm::vec3 position, neigbors neigbors)
     if (!neigbors.back)
     {
         model = glm::mat4(1.f);
-        model = glm::translate(model, glm::vec3(position.x, position.y, position.z - 0.5 ));
+        model = glm::translate(model, glm::vec3(position.x, position.y, position.z + 0.5 ));
         model = glm::rotate(model, glm::radians(0.f), glm::vec3(0.0f, 0.0f, 90.0f));
         program.setMat4("model", model);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
+}
 
+void begin_draw() 
+{
+    glBindVertexArray(block_vao);
+}
+
+void end_draw() 
+{
     glBindVertexArray(0);
 }

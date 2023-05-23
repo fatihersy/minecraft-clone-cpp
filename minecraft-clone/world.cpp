@@ -7,6 +7,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include <iostream>
 
@@ -26,6 +27,18 @@ typedef struct grid
     bool is_active;
 
 	neigbors neigbors;
+
+	bool is_buried() 
+	{
+		return 
+			neigbors.back && 
+			neigbors.down && 
+			neigbors.front && 
+			neigbors.left && 
+			neigbors.right && 
+			neigbors.up;
+	}
+
 }grid;
 
 
@@ -69,8 +82,8 @@ void initialize_world(std::vector<unsigned int> block_textures, unsigned int sky
 						((y - 1) < 0) ? false : grids[x][y - 1][z].is_active,
 						((x + 1) >= BOUND_X) ? false : grids[x + 1][y][z].is_active,
 						((x - 1) < 0) ? false : grids[x - 1][y][z].is_active,
-						((z + 1) >= BOUND_Z) ? false : grids[x][y][z + 1].is_active,
-						((z - 1) < 0) ? false : grids[x][y][z - 1].is_active
+						((z + 1) >= BOUND_Z) ? false : grids[x][y][z - 1].is_active,
+						((z - 1) < 0) ? false : grids[x][y][z + 1].is_active
 					};
 				}
 			}
@@ -82,41 +95,64 @@ void update_world(glm::mat4 view, glm::mat4 projection, glm::vec3 position, glm:
 {
 	update_block_shader(view, projection, position);
 
-	const int chunk_x = (front.x < 0) ? -CHUNK : CHUNK;
-	const int chunk_z = (front.z < 0) ? -CHUNK : CHUNK;
+	int max_z = position.z + CHUNK;
+	int min_z = position.z - CHUNK;
+	int max_x = position.x + CHUNK;
+	int min_x = position.x - CHUNK;
 
-	const int near_x = FMAX(position.x + -chunk_x, 0);
-	const int near_y = FMAX(position.y - 15, 0);
-	const int near_z = FMAX(position.z + -chunk_z, 0);
+	if (max_x < min_x) std::swap(max_x, min_x);
+	if (max_z < min_z) std::swap(max_z, min_z);
 
-	const int far_x = FMIN(position.x + chunk_x, BOUND_X);
-	const int far_y = FMIN(position.y + CHUNK, MAX_WORLD_Y);
-	const int far_z = FMIN(position.z + chunk_z, BOUND_Z);
+	max_x = std::clamp(max_x, 0, 256);
+	min_x = std::clamp(min_x, 0, 256);
+	max_z = std::clamp(max_z, 0, 256);
+	min_z = std::clamp(min_z, 0, 256);
 
-	int max_x = FMAX(far_x, near_x);
-	int min_x = FMIN(far_x, near_x);
-	int max_z = FMAX(far_z, near_z);
-	int min_z = FMIN(far_z, near_z);
-
-	max_x = FCLAMP(max_x, 0, 256);
-	min_x = FCLAMP(min_x, 0, 256);
-	max_z = FCLAMP(max_z, 0, 256);
-	min_z = FCLAMP(min_z, 0, 256);
+	begin_draw();
 
 	for (int x = min_x; x < max_x; ++x)
 	{
 		for (int z = min_z; z < max_z; ++z)
 		{
-			for (int y = near_y; y < far_y; ++y)
+			for (int y = 1; y < 10; ++y)
 			{
-				if (grids[x][y][z].is_active)
+				if (grids[x][y][z].is_active && !grids[x][y][z].is_buried())
 				{
-					draw_block(glm::vec3(x,y,z), grids[x][y][z].neigbors);
+					if (is_on_frustum(view, projection, glm::vec3(x,y,z))) 
+					{
+						draw_block(glm::vec3(x, y, z), grids[x][y][z].neigbors);
+					}
 				}
 			}
 		}
 	}
 
+	end_draw();
+
 	draw_skybox(glm::mat4(0.f), view, projection, position);
 }
 
+bool is_on_frustum(glm::mat4 view, glm::mat4 projection, glm::vec3 position) 
+{
+	glm::vec4 block_position_clip_space = projection * view * glm::vec4(
+			position.x + 0.5f,
+			position.y + 0.5f,
+			position.z + 0.5f,
+			1.0f
+	);
+
+	block_position_clip_space /= block_position_clip_space.w;
+
+	float x_ndc = block_position_clip_space.x;
+	float y_ndc = block_position_clip_space.y;
+	float z_ndc = block_position_clip_space.z;
+
+	if (x_ndc > -1.0f && x_ndc < 1.0f &&
+		y_ndc > -1.0f && y_ndc < 1.0f &&
+		z_ndc > -1.0f && z_ndc < 1.0f)
+	{
+		return true;
+	}
+	return false;
+
+}

@@ -53,7 +53,7 @@ unsigned int skybox_texture;
 
 void initialize_skybox_resources(unsigned int texture)
 {
-	skybox_program = create_program("D:/Workspace/Resources/skybox.vs", "D:/Workspace/Resources/skybox.fs");
+	skybox_program = create_program("D:/Workspace/CLang/Resources/skybox.vs", "D:/Workspace/CLang/Resources/skybox.fs");
 
     // skybox VAO
     glGenVertexArrays(1, &skyboxVAO);

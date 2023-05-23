@@ -14,7 +14,7 @@ typedef struct camera_metrice_packet
 {
     glm::mat4 view_matrix;
     glm::mat4 projection_matrix;
-    glm::vec3 get_camera_position;
+    glm::vec3 camera_position;
     glm::vec3 camera_front;
 } camera_metrice_packet;
 

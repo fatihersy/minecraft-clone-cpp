@@ -14,9 +14,9 @@ int main()
 
     std::vector<unsigned int> block_textures;
 
-    block_textures.push_back(loadTexture("D:/Workspace/grass_top.jpg", false));
-    block_textures.push_back(loadTexture("D:/Workspace/grass_side.jpg", false));
-    block_textures.push_back(loadTexture("D:/Workspace/grass_bottom.jpg", false));
+    block_textures.push_back(loadTexture("D:/Workspace/CLang/Resources/grass_top.jpg", false));
+    block_textures.push_back(loadTexture("D:/Workspace/CLang/Resources/grass_side.jpg", false));
+    block_textures.push_back(loadTexture("D:/Workspace/CLang/Resources/grass_bottom.jpg", false));
 
     unsigned int skybox_texture = loadCubemap(skybox_faces);
     initialize_world(block_textures, skybox_texture);
@@ -31,7 +31,7 @@ int main()
         (
             camera_metrices.view_matrix,
             camera_metrices.projection_matrix,
-            camera_metrices.get_camera_position,
+            camera_metrices.camera_position,
             camera_metrices.camera_front
         );
 
