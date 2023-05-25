@@ -23,10 +23,10 @@ float fov = 60.0f;
 
 float camera_speed = 10.f; // adjust accordingly
 
-float WINDOW_WIDTH;
-float WINDOW_HEIGHT;
+int WINDOW_WIDTH;
+int WINDOW_HEIGHT;
 
-void initialize_camera(float _width, float _height, float _yaw, float _pitch)
+void initialize_camera(int _width, int _height, float _yaw, float _pitch)
 {
 	WINDOW_WIDTH = _width;
 	WINDOW_HEIGHT = _height;
@@ -80,7 +80,7 @@ void move_camera(camera_movement move_direction, float delta_time)
 void update_camera_vectors() 
 {
 	// calculate the new Front vector
-	glm::vec3 front;
+	glm::vec3 front = glm::vec3(1.f);
 	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 	front.y = sin(glm::radians(pitch));
 	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));

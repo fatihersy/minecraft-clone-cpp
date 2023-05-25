@@ -55,7 +55,7 @@ void initialize_block_resources(std::vector<unsigned int> _block_textures)
 	program.setInt("texture2", 2);
 	program.setInt("texture3", 3);
 
-    for (size_t i = 1; i <= block_textures.size(); i++)
+    for (int i = 1; i <= block_textures.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, i);
@@ -69,10 +69,10 @@ void update_block_shader(glm::mat4 view, glm::mat4 projection, glm::vec3 positio
 
 void draw_block(glm::vec3 position, neigbors neigbors)
 {
-	program.setInt("texture_index", 3);
 
     if (!neigbors.up)
     {
+        program.setInt("texture_index", 1);
         model = glm::mat4(1.f);
         model = glm::translate(model, glm::vec3(position.x, position.y + 0.5, position.z ));
         model = glm::rotate(model, glm::radians(90.f), glm::vec3(90.0f, 0.0f, 0.0f));
@@ -83,6 +83,7 @@ void draw_block(glm::vec3 position, neigbors neigbors)
 
     if (!neigbors.down)
     {
+        program.setInt("texture_index", 4);
         model = glm::mat4(1.f);
         model = glm::translate(model, glm::vec3(position.x, position.y - 0.5, position.z ));
         model = glm::rotate(model, glm::radians(90.f), glm::vec3(90.0f, 0.0f, 0.0f));
@@ -93,6 +94,7 @@ void draw_block(glm::vec3 position, neigbors neigbors)
 
     if (!neigbors.right)
     {
+        program.setInt("texture_index", 2);
         model = glm::mat4(1.f);
         model = glm::translate(model, glm::vec3(position.x + 0.5, position.y, position.z ));
         model = glm::rotate(model, glm::radians(90.f), glm::vec3(0.0f, 90.f, 0.f));
@@ -103,6 +105,7 @@ void draw_block(glm::vec3 position, neigbors neigbors)
 
     if (!neigbors.left)
     {
+        program.setInt("texture_index", 2);
         model = glm::mat4(1.f);
         model = glm::translate(model, glm::vec3(position.x - 0.5, position.y, position.z ));
         model = glm::rotate(model, glm::radians(90.f), glm::vec3(0.0f, 90.f, 0.f));
@@ -113,6 +116,7 @@ void draw_block(glm::vec3 position, neigbors neigbors)
 
     if (!neigbors.front)
     {
+        program.setInt("texture_index", 2);
         model = glm::mat4(1.f);
         model = glm::translate(model, glm::vec3(position.x, position.y, position.z - 0.5 ));
         model = glm::rotate(model, glm::radians(0.f), glm::vec3(0.0f, 0.0f, 90.0f));
@@ -123,6 +127,7 @@ void draw_block(glm::vec3 position, neigbors neigbors)
 
     if (!neigbors.back)
     {
+        program.setInt("texture_index", 2);
         model = glm::mat4(1.f);
         model = glm::translate(model, glm::vec3(position.x, position.y, position.z + 0.5 ));
         model = glm::rotate(model, glm::radians(0.f), glm::vec3(0.0f, 0.0f, 90.0f));

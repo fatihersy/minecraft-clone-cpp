@@ -9,8 +9,8 @@ typedef struct neigbors
 	bool down;
 	bool right;
 	bool left;
-	bool front;
 	bool back;
+	bool front;
 } neigbors;
 
 void initialize_block_resources(std::vector<unsigned int> block_textures);

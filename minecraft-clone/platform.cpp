@@ -17,8 +17,8 @@ bool firstMouse = true;
 float lastX;
 float lastY;
 
-float window_width;
-float window_height;
+int window_width;
+int window_height;
 
 bool polymode_switch = true;
 
@@ -33,7 +33,7 @@ int create_window(const char* title, int width, int height);
 
 static GLFWwindow* window;
 
-void initialize_platform(const char* window_title, float _window_width, float _window_height) 
+void initialize_platform(const char* window_title, int _window_width, int _window_height) 
 {
     window_width = _window_width;
     window_height = _window_height;

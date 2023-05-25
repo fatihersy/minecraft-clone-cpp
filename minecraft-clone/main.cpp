@@ -5,8 +5,8 @@
 
 int main()
 {
-    float window_width = 1280;
-    float window_height = 720;
+    int window_width = 1280;
+    int window_height = 720;
 
     initialize_platform("minecraft-clone", window_width, window_height);
 

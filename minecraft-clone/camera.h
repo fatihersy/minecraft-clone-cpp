@@ -18,7 +18,7 @@ typedef struct camera_metrice_packet
     glm::vec3 camera_front;
 } camera_metrice_packet;
 
-void initialize_camera(float _width, float _height, float _yaw = -90, float _pitch = 0.f);
+void initialize_camera(int _width, int _height, float _yaw = -90, float _pitch = 0.f);
 
 camera_metrice_packet camera_update_packet();
 
