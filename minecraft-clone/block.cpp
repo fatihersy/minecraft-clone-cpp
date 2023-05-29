@@ -19,11 +19,11 @@ unsigned int indices_quad[] = {  // note that we start from 0!
 
 
 shader_program program;
-unsigned int block_vao, block_vbo, block_ebo;
-std::vector<unsigned int> block_textures;
+GLuint block_vao, block_vbo, block_ebo;
+std::vector<uint16_t> block_textures;
 static glm::mat4 model(1.f);
 
-void initialize_block_resources(std::vector<unsigned int> _block_textures)
+void initialize_block_resources(std::vector<uint16_t> _block_textures)
 {
 	program = create_program("D:/Workspace/CLang/Resources/cubemaps.vs", "D:/Workspace/CLang/Resources/cubemaps.fs");
 
@@ -55,7 +55,7 @@ void initialize_block_resources(std::vector<unsigned int> _block_textures)
 	program.setInt("texture2", 2);
 	program.setInt("texture3", 3);
 
-    for (int i = 1; i <= block_textures.size(); i++)
+    for (size_t i = 1; i <= block_textures.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, i);

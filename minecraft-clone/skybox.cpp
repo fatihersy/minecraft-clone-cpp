@@ -48,10 +48,10 @@ float skyboxVertices[] = {
 };
 
 shader_program skybox_program;
-unsigned int skyboxVAO, skyboxVBO;
-unsigned int skybox_texture;
+GLuint skyboxVAO, skyboxVBO;
+uint16_t skybox_texture;
 
-void initialize_skybox_resources(unsigned int texture)
+void initialize_skybox_resources(uint16_t texture)
 {
 	skybox_program = create_program("D:/Workspace/CLang/Resources/skybox.vs", "D:/Workspace/CLang/Resources/skybox.fs");
 

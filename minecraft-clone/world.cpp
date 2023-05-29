@@ -10,6 +10,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include <iostream>
+#include <map>
 
 // world space positions of our cubes
 #define BOUND_X 256
@@ -22,38 +23,21 @@
 
 #define CHUNK 60
 
-typedef enum structure_type {
-	NONE = 0,
-	TREE
-} structure_type;
-
-typedef struct grid
+typedef struct coord 
 {
-    bool is_active;
+	coord() : x{ 0 }, z{ 0 }, y{ 0 } {};
 
-	neigbors neigbors;
+	coord(uint16_t _x, uint16_t _z, uint16_t _y) : x{_x}, z{ _z }, y{ _y } {}
 
-	structure_type type;
+	uint16_t x;
+	uint16_t z;
+	uint16_t y;
+};
 
-	bool is_buried() 
-	{
-		return 
-			neigbors.back && 
-			neigbors.down && 
-			neigbors.front && 
-			neigbors.left && 
-			neigbors.right && 
-			neigbors.up;
-	}
+block matrix[MAX_WORLD_X][MAX_WORLD_Z][MAX_WORLD_Y] = {};
+std::vector<coord> tree_coords({});
 
-}grid;
-
-
-grid grids[MAX_WORLD_X][MAX_WORLD_Z][MAX_WORLD_Y] = { {{ 0 }} };
-
-glm::vec3 selected_block(0.f);
-
-void initialize_world(std::vector<unsigned int> block_textures, unsigned int skybox_texture)
+void initialize_world(std::vector<uint16_t> block_textures, uint16_t skybox_texture)
 {
     initialize_block_resources(block_textures);
     initialize_skybox_resources(skybox_texture);
@@ -62,24 +46,53 @@ void initialize_world(std::vector<unsigned int> block_textures, unsigned int sky
 
 	const siv::PerlinNoise perlin{ seed };
 
+	int16_t delay_row = 0;
+	int16_t delay_col = 0;
+
+	std::random_device dev;
+	std::mt19937 rng(dev());
+	std::uniform_int_distribution<std::mt19937::result_type> dist6(1, 100);
+
 	for (int x = 0; x < MAX_WORLD_X; ++x)
 	{
 		for (int z = 0; z < MAX_WORLD_Z; ++z)
 		{
-			const double noise = (perlin.octave2D_01((x * 0.01), (z * 0.01), 5, 0.7) * 10);
+			const short noise = (perlin.octave2D_01((x * 0.01), (z * 0.01), 5, 0.7) * 10);
 
 			for (int y = 0; y < noise; ++y)
 			{
-				grids[x][z][y].is_active = true;
+				matrix[x][z][y].is_active = true;
 
-				if (y == noise - 1 && (rand() % 3 + 1) == 1) 
+				if (y == noise - 1 && (dist6(rng) == 1) && (delay_row <= 0 || delay_col <= 0 ) )
 				{
-					std::cout << "initialize_world()::TREE_FRAG: x:" << x << " y: " << y << " z: " << z << std::endl;
+					bool is_offset = false;
 
-					grids[x][z][y].type = TREE;
+					for (coord fol2 : tree_coords)
+					{
+						if ((x - 5 > fol2.x) || (x + 5 < fol2.x)) continue;
+						if ((z - 5 > fol2.z) || (z + 5 < fol2.z)) continue;
+						if (y != fol2.y) continue;
+
+						is_offset = true;
+						break;
+					}
+
+					if (!is_offset) 
+					{
+						matrix[x][z][y].type = TREE;
+						tree_coords.push_back(coord(x, z, y));
+
+						if (delay_col <= 0) delay_col = TREE * 6;
+						if (delay_row <= 0) delay_row = TREE * 6;
+					}
 				}
+
 			}
+
+			delay_col--;
 		}
+
+		delay_row--;
 	}
 
 	for (int x = 0; x < MAX_WORLD_X; ++x)
@@ -88,16 +101,16 @@ void initialize_world(std::vector<unsigned int> block_textures, unsigned int sky
 		{
 			for (int y = 0; y < MAX_WORLD_Y; ++y)
 			{
-				if (grids[x][z][y].is_active)
+				if (matrix[x][z][y].is_active)
 				{
-					grids[x][z][y].neigbors =
+					matrix[x][z][y].neigbors =
 					{
-						((y + 1) >= BOUND_Y) ? false : grids[x][z][y + 1].is_active,
-						((y - 1) < 0) ? false : grids[x][z][y - 1].is_active,
-						((x + 1) >= BOUND_X) ? false : grids[x + 1][z][y].is_active,
-						((x - 1) < 0) ? false : grids[x - 1][z][y].is_active,
-						((z + 1) >= BOUND_Z) ? false : grids[x][z + 1][y].is_active,
-						((z - 1) < 0) ? false : grids[x][z - 1][y].is_active
+						((y + 1) >= BOUND_Y) ? false : matrix[x][z][y + 1].is_active,
+						((y - 1) < 0) ? false : matrix[x][z][y - 1].is_active,
+						((x + 1) >= BOUND_X) ? false : matrix[x + 1][z][y].is_active,
+						((x - 1) < 0) ? false : matrix[x - 1][z][y].is_active,
+						((z + 1) >= BOUND_Z) ? false : matrix[x][z + 1][y].is_active,
+						((z - 1) < 0) ? false : matrix[x][z - 1][y].is_active
 					};
 				}
 			}
@@ -130,25 +143,25 @@ void update_world(glm::mat4 view, glm::mat4 projection, glm::vec3 position, glm:
 		{
 			for (size_t y = 1; y < 15; ++y)
 			{
-				if (grids[x][z][y].is_active && !grids[x][z][y].is_buried())
+				if (matrix[x][z][y].is_active && !matrix[x][z][y].is_buried())
 				{
 					if (is_on_frustum(view, projection, glm::vec3(x,y,z))) 
 					{
-						draw_block(glm::vec3(x, y, z), grids[x][z][y].neigbors);
+						draw_block(glm::vec3(x, y, z), matrix[x][z][y].neigbors);
 
 						//std::cout << "update_world()::TREE_FRAG: " << grids[x][z][y].type << std::endl;
 
-						if(grids[x][z][y].type == TREE)
+						if(matrix[x][z][y].type == TREE)
 						{
-							draw_block(glm::vec3(x, y + 1, z), grids[x][z][y+1].neigbors);
-							draw_block(glm::vec3(x, y + 2, z), grids[x][z][y+2].neigbors);
-							draw_block(glm::vec3(x, y + 3, z), grids[x][z][y+3].neigbors);
-							draw_block(glm::vec3(x, y + 4, z), grids[x][z][y + 1].neigbors);
-							draw_block(glm::vec3(x, y + 5, z), grids[x][z][y + 2].neigbors);
-							draw_block(glm::vec3(x, y + 6, z), grids[x][z][y + 3].neigbors);
-							draw_block(glm::vec3(x, y + 7, z), grids[x][z][y + 1].neigbors);
-							draw_block(glm::vec3(x, y + 8, z), grids[x][z][y + 2].neigbors);
-							draw_block(glm::vec3(x, y + 9, z), grids[x][z][y + 3].neigbors);
+							draw_block(glm::vec3(x, y + 1, z), matrix[x][z][y+1].neigbors);
+							draw_block(glm::vec3(x, y + 2, z), matrix[x][z][y+2].neigbors);
+							draw_block(glm::vec3(x, y + 3, z), matrix[x][z][y+3].neigbors);
+							draw_block(glm::vec3(x, y + 4, z), matrix[x][z][y + 1].neigbors);
+							draw_block(glm::vec3(x, y + 5, z), matrix[x][z][y + 2].neigbors);
+							draw_block(glm::vec3(x, y + 6, z), matrix[x][z][y + 3].neigbors);
+							draw_block(glm::vec3(x, y + 7, z), matrix[x][z][y + 1].neigbors);
+							draw_block(glm::vec3(x, y + 8, z), matrix[x][z][y + 2].neigbors);
+							draw_block(glm::vec3(x, y + 9, z), matrix[x][z][y + 3].neigbors);
 						}
 					}
 				}
